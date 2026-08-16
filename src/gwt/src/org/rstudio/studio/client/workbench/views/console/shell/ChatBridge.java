@@ -3,10 +3,11 @@
  *
  * Copyright (C) 2026 by bioagent contributors
  *
- * Bridges the RStudio console (agent mode) to the bioagent chat backend:
- * obtains the backend WebSocket URL from rsession and relays user messages
- * and agent events over it. Agent prose replies are surfaced to the Shell
- * for inline rendering in the console.
+ * Bridges the RStudio console (agent mode) to the bioagent chat backend.
+ * Obtains the backend WebSocket URL from rsession, starting the backend
+ * on demand when it is not yet running (agent mode works without ever
+ * opening the Posit Assistant pane). Agent prose replies are surfaced to
+ * the Shell for inline rendering in the console.
  */
 package org.rstudio.studio.client.workbench.views.console.shell;
 
@@ -66,7 +67,15 @@ public class ChatBridge
          cb.onConnected();
          return;
       }
+      requestUrl(cb, 0);
+   }
 
+   /**
+    * Fetch the backend URL; when the backend is not running, start it once
+    * and poll until the URL becomes ready (backend launch takes ~1s).
+    */
+   private void requestUrl(final ConnectedCallback cb, final int pollCount)
+   {
       chatServer_.chatGetBackendUrl(new ServerRequestCallback<JsObject>()
       {
          @Override
@@ -75,7 +84,17 @@ public class ChatBridge
             BackendUrl url = response.cast();
             if (url == null || StringUtil.isNullOrEmpty(url.getUrl()) || !url.getReady())
             {
-               cb.onFailure("backend not ready");
+               if (pollCount == 0)
+               {
+                  startBackend(cb);
+                  return;
+               }
+               if (pollCount >= MAX_POLLS)
+               {
+                  cb.onFailure("backend did not start");
+                  return;
+               }
+               scheduleUrlPoll(cb, pollCount + 1);
                return;
             }
             connect(url.getUrl());
@@ -98,6 +117,36 @@ public class ChatBridge
             cb.onFailure(error.getUserMessage());
          }
       });
+   }
+
+   private void startBackend(final ConnectedCallback cb)
+   {
+      chatServer_.chatStartBackend(new ServerRequestCallback<JsObject>()
+      {
+         @Override
+         public void onResponseReceived(JsObject response)
+         {
+            scheduleUrlPoll(cb, 1);
+         }
+
+         @Override
+         public void onError(ServerError error)
+         {
+            cb.onFailure(error.getUserMessage());
+         }
+      });
+   }
+
+   private void scheduleUrlPoll(final ConnectedCallback cb, final int pollCount)
+   {
+      new Timer()
+      {
+         @Override
+         public void run()
+         {
+            requestUrl(cb, pollCount);
+         }
+      }.schedule(POLL_INTERVAL_MS);
    }
 
    private native void connect(String url) /*-{
@@ -123,7 +172,7 @@ public class ChatBridge
       };
       // Static ai-chat assets are served by rsession at the session-relative
       // path (not the portmapped WS path), and serving them re-sets the
-      // auth cookie. Fetch that, then open the socket.
+      // auth cookie.
       $wnd.fetch("ai-chat/index.html?_t=" + Date.now(), { credentials: "include" })
          .then(open, open);
    }-*/;
@@ -216,6 +265,9 @@ public class ChatBridge
       public final native String getUrl() /*-{ return this.url || ""; }-*/;
       public final native boolean getReady() /*-{ return !!this.ready; }-*/;
    }
+
+   private static final int POLL_INTERVAL_MS = 700;
+   private static final int MAX_POLLS = 15;
 
    private final AgentMessageDisplay display_;
    private final ChatServerOperations chatServer_;
