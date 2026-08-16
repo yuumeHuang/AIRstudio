@@ -94,6 +94,15 @@ public interface ApplicationServerOperations extends PrefsServerOperations
    
    void getAvailableRVersions(
       ServerRequestCallback<JsArray<RVersionSpec>> callback);
+
+   void getCondaRVersions(
+      ServerRequestCallback<CondaEnvsResult> callback);
+
+   void switchREnvironment(
+         String rHome,
+         String version,
+         String label,
+         ServerRequestCallback<Boolean> callback);
    
    void getProjectRVersion(
          String projectDir,

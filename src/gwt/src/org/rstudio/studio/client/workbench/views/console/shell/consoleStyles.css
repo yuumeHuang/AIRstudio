@@ -1,0 +1,6 @@
+
+/* conda environment switcher (toolbar dropdown) */
+.renv-menu-header { font-weight: 600; opacity: 0.75; }
+.renv-menu-info { opacity: 0.7; font-style: italic; }
+.renv-check { font-weight: 700; }
+.renv-version { opacity: 0.6; font-size: 0.9em; margin-left: 4px; }

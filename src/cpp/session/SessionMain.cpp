@@ -153,6 +153,7 @@
 #include "modules/SessionConfigFile.hpp"
 #include "modules/SessionConsole.hpp"
 #include "modules/SessionChat.hpp"
+#include "modules/SessionREnvs.hpp"
 #include "modules/SessionCRANMirrors.hpp"
 #include "modules/SessionCrypto.hpp"
 #include "modules/SessionDebugging.hpp"
@@ -777,6 +778,7 @@ Error rInit(const rstudio::r::session::RInitInfo& rInitInfo)
       (modules::lsp::initialize)
       (modules::assistant::initialize)
       (modules::chat::initialize)
+      (modules::r_envs::initialize)
       (modules::trust::initialize)
       (modules::air::initialize)
 

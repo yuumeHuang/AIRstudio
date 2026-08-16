@@ -40,6 +40,7 @@ import org.rstudio.studio.client.application.events.EventBus;
 import org.rstudio.studio.client.application.ui.AboutDialog;
 import org.rstudio.studio.client.application.ui.ProjectPopupMenu;
 import org.rstudio.studio.client.application.ui.addins.AddinsToolbarButton;
+import org.rstudio.studio.client.application.ui.REnvSwitcherButton;
 import org.rstudio.studio.client.application.ui.impl.DesktopApplicationHeader;
 import org.rstudio.studio.client.application.ui.impl.WebApplicationHeader;
 import org.rstudio.studio.client.application.ui.impl.WebApplicationHeaderOverlay;
@@ -324,6 +325,7 @@ public interface RStudioGinjector extends Ginjector
    void injectMembers(RStudioThemedFrame frame);
    void injectMembers(AceBackgroundHighlighter highlighter);
    void injectMembers(AddinsToolbarButton button);
+   void injectMembers(REnvSwitcherButton button);
    void injectMembers(AboutDialog aboutDialog);
    void injectMembers(NewConnectionInstallOdbcHost newConnectionInstallOdbcHost);
    void injectMembers(NewConnectionPreInstallOdbcHost NewConnectionPreInstallOdbcHost);

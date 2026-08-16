@@ -50,6 +50,8 @@ import org.rstudio.studio.client.application.events.RestartStatusEvent;
 import org.rstudio.studio.client.application.events.SessionRelaunchEvent;
 import org.rstudio.studio.client.application.events.UnauthorizedEvent;
 import org.rstudio.studio.client.application.model.ActiveSession;
+import org.rstudio.studio.client.application.model.CondaEnvSpec;
+import org.rstudio.studio.client.application.model.CondaEnvsResult;
 import org.rstudio.studio.client.application.model.InvalidSessionInfo;
 import org.rstudio.studio.client.application.model.ProductInfo;
 import org.rstudio.studio.client.application.model.ProductNotice;
@@ -2360,6 +2362,25 @@ public class RemoteServer implements Server
          ServerRequestCallback<JsArray<RVersionSpec>> callback)
    {
       sendRequest(RPC_SCOPE, GET_AVAILABLE_R_VERSIONS, callback);
+   }
+   @Override
+   public void getCondaRVersions(
+         ServerRequestCallback<CondaEnvsResult> callback)
+   {
+      sendRequest(RPC_SCOPE, GET_CONDA_R_VERSIONS, callback);
+   }
+   @Override
+   public void switchREnvironment(
+         String rHome,
+         String version,
+         String label,
+         ServerRequestCallback<Boolean> callback)
+   {
+      JSONArray params = new JSONArray();
+      params.set(0, new JSONString(StringUtil.notNull(rHome)));
+      params.set(1, new JSONString(StringUtil.notNull(version)));
+      params.set(2, new JSONString(StringUtil.notNull(label)));
+      sendRequest(RPC_SCOPE, SWITCH_R_ENVIRONMENT, params, callback);
    }
 
    public void getProjectRVersion(
@@ -7346,6 +7367,8 @@ public class RemoteServer implements Server
    private static final String SET_SESSION_LABEL = "set_session_label";
    private static final String DELETE_SESSION_DIR = "delete_session_dir";
    private static final String GET_AVAILABLE_R_VERSIONS = "get_available_r_versions";
+   private static final String GET_CONDA_R_VERSIONS = "get_conda_r_versions";
+   private static final String SWITCH_R_ENVIRONMENT = "switch_r_environment";
    private static final String CREATE_PROJECT = "create_project";
    private static final String CREATE_PROJECT_FILE = "create_project_file";
    private static final String GET_PROJECT_TEMPLATE_REGISTRY = "get_project_template_registry";
