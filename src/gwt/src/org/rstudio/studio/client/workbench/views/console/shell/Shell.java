@@ -469,7 +469,7 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
          eventBus_.fireEvent(new ConsoleHistoryAddedEvent(commandText));
 
       // fire event
-      eventBus_.fireEvent(new ConsoleInputEvent(commandText, , echo ? 0 : ConsoleInputEvent.FLAG_NO_ECHO));
+      eventBus_.fireEvent(new ConsoleInputEvent(commandText, "", echo ? 0 : ConsoleInputEvent.FLAG_NO_ECHO));
    }
 
    // ---------------------------------------------------------------------
@@ -480,9 +480,7 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
    {
       agentMode_ = !agentMode_;
       view_.setAgentMode(agentMode_);
-      ariaLive_.announce(agentMode_
-            ? Agent mode enabled
-            : Agent mode disabled);
+      Debug.log("bioagent: agent mode " + (agentMode_ ? "enabled" : "disabled"));
    }
 
    private void processAgentCommandEntry()
@@ -492,7 +490,7 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
          return;
       if (addToHistory_ && commandText.length() > 0)
          eventBus_.fireEvent(new ConsoleHistoryAddedEvent(commandText));
-      view_.consoleWriteInput(commandText + \n, , true);
+      view_.consoleWriteInput(commandText + "\n", "", true);
       chatBridge_.send(commandText);
    }
 
@@ -719,6 +717,15 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
          // typically we allow all the handlers to process the key; however,
          // this behavior is suppressed when we're incrementally searching the
          // history so we don't stack two kinds of completion popups
+         if (keyCode == KeyCodes.KEY_TAB && event.isShiftKeyDown())
+         {
+            // bioagent: toggle agent mode before any completion/history
+            // preview handler can consume the keystroke
+            event.preventDefault();
+            event.stopPropagation();
+            toggleAgentMode();
+            return;
+         }
          ArrayList<KeyDownPreviewHandler> handlers = keyDownPreviewHandlers_;
          if (historyCompletion_.getMode() ==
                HistoryCompletionManager.PopupMode.PopupIncremental)
@@ -737,13 +744,6 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
             }
          }
 
-         if (keyCode == KeyCodes.KEY_TAB && event.isShiftKeyDown())
-         {
-            event.preventDefault();
-            event.stopPropagation();
-            toggleAgentMode();
-            return;
-         }
          if (event.getNativeKeyCode() == KeyCodes.KEY_TAB)
          {
             if (prefs_.tabKeyMoveFocus().getValue())

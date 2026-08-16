@@ -17,12 +17,10 @@ import com.google.gwt.user.client.Timer;
 
 import org.rstudio.core.client.Debug;
 import org.rstudio.core.client.StringUtil;
+import org.rstudio.core.client.js.JsObject;
 import org.rstudio.studio.client.server.ServerError;
 import org.rstudio.studio.client.server.ServerRequestCallback;
 import org.rstudio.studio.client.workbench.views.chat.server.ChatServerOperations;
-
-import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.JsArrayMixed;
 
 public class ChatBridge
 {
@@ -69,10 +67,10 @@ public class ChatBridge
          return;
       }
 
-      chatServer_.chatGetBackendUrl(new ServerRequestCallback<com.google.gwt.core.client.JsObject>()
+      chatServer_.chatGetBackendUrl(new ServerRequestCallback<JsObject>()
       {
          @Override
-         public void onResponseReceived(com.google.gwt.core.client.JsObject response)
+         public void onResponseReceived(JsObject response)
          {
             BackendUrl url = response.cast();
             if (url == null || StringUtil.isNullOrEmpty(url.getUrl()) || !url.getReady())
@@ -91,7 +89,7 @@ public class ChatBridge
                   else
                      cb.onFailure("connect timeout");
                }
-            }.schedule(500);
+            }.schedule(3000);
          }
 
          @Override
@@ -106,17 +104,28 @@ public class ChatBridge
       var self = this;
       var abs = url.indexOf("ws") === 0 ? url
          : ($wnd.location.protocol === "https:" ? "wss://" : "ws://") + $wnd.location.host + url;
-      var sock = new WebSocket(abs);
-      self.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::sock = sock;
-      sock.onopen = function() {
-         self.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::onOpen()();
+      // The posit-assistant-auth cookie is (re)set only when ai-chat static
+      // files are served, and the backend rotates its token on every restart,
+      // so refresh the cookie before opening the socket. Opening from the
+      // fetch callback guarantees the fresh cookie is in place.
+      var open = function() {
+         var sock = new WebSocket(abs);
+         self.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::sock = sock;
+         sock.onopen = function() {
+            self.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::onOpen()();
+         };
+         sock.onclose = function() {
+            self.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::onClose()();
+         };
+         sock.onmessage = function(ev) {
+            self.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::onMessage(Ljava/lang/String;)(ev.data);
+         };
       };
-      sock.onclose = function() {
-         self.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::onClose()();
-      };
-      sock.onmessage = function(ev) {
-         self.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::onMessage(Ljava/lang/String;)(ev.data);
-      };
+      // Static ai-chat assets are served by rsession at the session-relative
+      // path (not the portmapped WS path), and serving them re-sets the
+      // auth cookie. Fetch that, then open the socket.
+      $wnd.fetch("ai-chat/index.html?_t=" + Date.now(), { credentials: "include" })
+         .then(open, open);
    }-*/;
 
    private native boolean isSocketOpen() /*-{
@@ -144,17 +153,13 @@ public class ChatBridge
       try
       {
          JSONValue root = JSONParser.parseStrict(data);
-         if (root == null || !root.isObject().equals(null))
+         if (root == null || root.isObject() == null)
             return;
-         String type = root.isObject().get("type") != null
-               && root.isObject().get("type").isString() != null
-               ? root.isObject().get("type").isString().stringValue() : "";
+         String type = str(root, "type");
 
          if ("error".equals(type))
          {
-            JSONValue msg = root.isObject().get("message");
-            String m = msg != null && msg.isString() != null ? msg.isString().stringValue() : "unknown";
-            display_.onAgentProse("[bioagent error: " + m + "]\n", true);
+            display_.onAgentProse("[bioagent error: " + str(root, "message") + "]\n", true);
             return;
          }
          if (!"agent_event".equals(type))
@@ -163,18 +168,13 @@ public class ChatBridge
          JSONValue ev = root.isObject().get("event");
          if (ev == null || ev.isObject() == null)
             return;
-         String evType = ev.isObject().get("type") != null
-               && ev.isObject().get("type").isString() != null
-               ? ev.isObject().get("type").isString().stringValue() : "";
-         if (!"message_end".equals(evType))
+         if (!"message_end".equals(str(ev, "type")))
             return;
 
          JSONValue message = ev.isObject().get("message");
          if (message == null || message.isObject() == null)
             return;
-         JSONValue role = message.isObject().get("role");
-         if (role == null || role.isString() == null
-               || !"assistant".equals(role.isString().stringValue()))
+         if (!"assistant".equals(str(message, "role")))
             return;
 
          JSONValue content = message.isObject().get("content");
@@ -187,8 +187,7 @@ public class ChatBridge
             JSONValue item = content.isArray().get(i);
             if (item == null || item.isObject() == null)
                continue;
-            JSONValue t = item.isObject().get("type");
-            if (t != null && t.isString() != null && "text".equals(t.isString().stringValue()))
+            if ("text".equals(str(item, "type")))
             {
                JSONValue txt = item.isObject().get("text");
                if (txt != null && txt.isString() != null)
@@ -200,8 +199,14 @@ public class ChatBridge
       }
       catch (Exception e)
       {
-         Debug.logError(StringUtil.notNull(e.getMessage()));
+         Debug.log(StringUtil.notNull(e.getMessage()));
       }
+   }
+
+   private static String str(JSONValue obj, String key)
+   {
+      JSONValue v = obj.isObject().get(key);
+      return v != null && v.isString() != null ? v.isString().stringValue() : "";
    }
 
    // Overlay for the chat_get_backend_url response
