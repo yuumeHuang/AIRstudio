@@ -429,6 +429,20 @@ public class ShellWidget extends Composite implements ShellDisplay,
    }
    
    @Override
+   @Override
+   public void setAgentMode(boolean agentMode)
+   {
+      Element el = input_.getWidget().getElement();
+      if (agentMode)
+      {
+         el.addClassName(RSTUDIO_AGENT_MODE);
+      }
+      else
+      {
+         el.removeClassName(RSTUDIO_AGENT_MODE);
+      }
+   }
+
    public void setBusy(boolean busy)
    {
       Element el = input_.getWidget().getElement();
@@ -1326,5 +1340,6 @@ public class ShellWidget extends Composite implements ShellDisplay,
    private static final String AGENT_CLASS_OUTPUT = " rstudio-agent-output";
    private static final String AGENT_CLASS_ERROR = " rstudio-agent-error";
    private static final String RSTUDIO_CONSOLE_BUSY = "rstudio-console-busy";
+   private static final String RSTUDIO_AGENT_MODE = "rstudio-agent-mode";
    private static final String RSTUDIO_CONSOLE_WAITING_FOR_INPUT = "rstudio-console-waiting-for-input";
 }

@@ -117,8 +117,8 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
                               UnhandledErrorEvent.Handler,
                               SuppressNextShellFocusEvent.Handler,
                               RestartStatusEvent.Handler,
-                              HistoryEntriesAddedEvent.Handler
-                              
+                              HistoryEntriesAddedEvent.Handler,
+                              ChatBridge.AgentMessageDisplay
 {
    static interface Binder extends CommandBinder<Commands, Shell>
    {
@@ -145,7 +145,8 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
                 ErrorManager errorManager,
                 DependencyManager dependencyManager,
                 ConsoleEditorProvider editorProvider,
-                ConsoleLanguageTracker languageTracker)
+                ConsoleLanguageTracker languageTracker,
+                org.rstudio.studio.client.workbench.views.chat.server.ChatServerOperations chatServer)
    {
       super();
 
@@ -164,6 +165,7 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
       browseHistoryManager_ = new CommandLineHistory(input_);
       prefs_ = uiPrefs;
       languageTracker_ = languageTracker;
+      chatBridge_ = new ChatBridge(this, chatServer);
 
       editorProvider.setConsoleEditor(input_);
 
@@ -467,7 +469,42 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
          eventBus_.fireEvent(new ConsoleHistoryAddedEvent(commandText));
 
       // fire event
-      eventBus_.fireEvent(new ConsoleInputEvent(commandText, "", echo ? 0 : ConsoleInputEvent.FLAG_NO_ECHO));
+      eventBus_.fireEvent(new ConsoleInputEvent(commandText, , echo ? 0 : ConsoleInputEvent.FLAG_NO_ECHO));
+   }
+
+   // ---------------------------------------------------------------------
+   // bioagent: agent mode (Shift+Tab toggle)
+   // ---------------------------------------------------------------------
+
+   private void toggleAgentMode()
+   {
+      agentMode_ = !agentMode_;
+      view_.setAgentMode(agentMode_);
+      ariaLive_.announce(agentMode_
+            ? Agent mode enabled
+            : Agent mode disabled);
+   }
+
+   private void processAgentCommandEntry()
+   {
+      String commandText = view_.processCommandEntry();
+      if (commandText.trim().length() == 0)
+         return;
+      if (addToHistory_ && commandText.length() > 0)
+         eventBus_.fireEvent(new ConsoleHistoryAddedEvent(commandText));
+      view_.consoleWriteInput(commandText + \n, , true);
+      chatBridge_.send(commandText);
+   }
+
+   boolean isAgentMode()
+   {
+      return agentMode_;
+   }
+
+   @Override
+   public void onAgentProse(String text, boolean done)
+   {
+      view_.consoleWriteOutput(text, true);
    }
 
    public void onSendToConsole(final SendToConsoleEvent event)
@@ -665,6 +702,11 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
       }
    }
 
+   // bioagent: agent mode state. Toggled with Shift+Tab; Enter routes to
+   // the chat backend (bioagent) instead of the R interpreter.
+   private boolean agentMode_ = false;
+   private ChatBridge chatBridge_;
+
    private final class InputKeyHandler implements KeyDownHandler,
                                                   KeyPressHandler,
                                                   KeyUpHandler
@@ -695,6 +737,13 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
             }
          }
 
+         if (keyCode == KeyCodes.KEY_TAB && event.isShiftKeyDown())
+         {
+            event.preventDefault();
+            event.stopPropagation();
+            toggleAgentMode();
+            return;
+         }
          if (event.getNativeKeyCode() == KeyCodes.KEY_TAB)
          {
             if (prefs_.tabKeyMoveFocus().getValue())
@@ -741,7 +790,10 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
             event.stopPropagation();
 
             restoreFocus_ = true;
-            processCommandEntry();
+            if (agentMode_)
+               processAgentCommandEntry();
+            else
+               processCommandEntry();
          }
          else if (
                (keyCode == KeyCodes.KEY_ESCAPE &&

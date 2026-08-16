@@ -45,6 +45,12 @@ public interface ShellDisplay extends ShellOutputWriter,
    
    void setBusy(boolean busy);
 
+   /**
+    * bioagent: toggle agent mode styling on the console input (green prompt
+    * and input text while agent mode is active).
+    */
+   void setAgentMode(boolean agentMode);
+
    // Indicates R is blocked waiting for interactive input from the user (e.g.
    // readline(), menu(), scan()) rather than at the normal REPL prompt. Such a
    // prompt clears the busy state, so the two are tracked separately.
