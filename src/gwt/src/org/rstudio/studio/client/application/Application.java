@@ -1544,7 +1544,7 @@ public class Application implements ApplicationEventHandlers
    private DragDropReceiver dragDropReceiver_;
    private boolean fileUploadInProgress_ = false;
 
-   private final String CSRF_TOKEN_FIELD = "rs-csrf-token";
+   private final String CSRF_TOKEN_FIELD = "air-csrf-token";
 
    private ClientStateUpdater clientStateUpdaterInstance_;
    private RootLayoutPanel rootPanel_;

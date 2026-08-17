@@ -154,7 +154,7 @@ public class FileExport
       // Add parameters
       addHiddenField(form, "name", name);
       addHiddenField(form, "file", file.getPath());
-      addHiddenField(form, "rs-csrf-token", ApplicationCsrfToken.getCsrfToken());
+      addHiddenField(form, "air-csrf-token", ApplicationCsrfToken.getCsrfToken());
 
       // Submit form
       Document.get().getBody().appendChild(form);
@@ -175,7 +175,7 @@ public class FileExport
       // Add parameters
       addHiddenField(form, "name", archiveName);
       addHiddenField(form, "parent", parentDirectory.getPath());
-      addHiddenField(form, "rs-csrf-token", ApplicationCsrfToken.getCsrfToken());
+      addHiddenField(form, "air-csrf-token", ApplicationCsrfToken.getCsrfToken());
 
       for (int i = 0; i < filenames.size(); i++)
       {
