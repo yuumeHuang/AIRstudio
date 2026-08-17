@@ -16,7 +16,7 @@
 set -euo pipefail
 
 OUT=${AIR_STUDIO_ETC:-/etc/air-studio}/r-versions
-PUBLIC_ROOTS=(/opt/miniforge3/envs)
+PUBLIC_ROOTS=(/opt/miniforge3/envs /opt/miniconda3/envs /opt/anaconda3/envs)
 HOME_ENV_RELS=(.conda/envs miniconda3/envs anaconda3/envs miniforge3/envs)
 LOG_TAG=air-studio-r-versions
 
