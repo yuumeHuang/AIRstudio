@@ -23,7 +23,8 @@ public class ProductEditionInfo
 {
    public String editionName()
    {
-      return constants_.rStudioEditionName(Desktop.isDesktop() ? "" : " " + constants_.serverLabel());
+      // AIR Studio: rebranded product name for this deployment
+      return "AIR Studio";
    }
    
    public boolean proLicense()

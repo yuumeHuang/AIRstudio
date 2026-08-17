@@ -429,17 +429,20 @@ public class ShellWidget extends Composite implements ShellDisplay,
    }
    
    @Override
-   @Override
    public void setAgentMode(boolean agentMode)
    {
+      agentMode_ = agentMode;
       Element el = input_.getWidget().getElement();
+      Element promptEl = prompt_.getElement();
       if (agentMode)
       {
          el.addClassName(RSTUDIO_AGENT_MODE);
+         promptEl.addClassName(RSTUDIO_AGENT_MODE);
       }
       else
       {
          el.removeClassName(RSTUDIO_AGENT_MODE);
+         promptEl.removeClassName(RSTUDIO_AGENT_MODE);
       }
    }
 
@@ -1040,7 +1043,8 @@ public class ShellWidget extends Composite implements ShellDisplay,
 
       SpanElement pendingPrompt = Document.get().createSpanElement();
       pendingPrompt.setInnerText(promptText);
-      pendingPrompt.setClassName(styles_.prompt() + " " + KEYWORD_CLASS_NAME);
+      pendingPrompt.setClassName(styles_.prompt() + " " + KEYWORD_CLASS_NAME
+            + (agentMode_ ? AGENT_CLASS_INPUT : ""));
 
       if (!suppressPendingInput_ && !input_.isPasswordMode())
       {
@@ -1048,7 +1052,8 @@ public class ShellWidget extends Composite implements ShellDisplay,
          String[] lines = StringUtil.notNull(commandText).split("\n");
          String firstLine = lines.length > 0 ? lines[0] : "";
          pendingInput.setInnerText(firstLine + "\n");
-         pendingInput.setClassName(styles_.command() + " " + KEYWORD_CLASS_NAME);
+         pendingInput.setClassName(styles_.command() + " " + KEYWORD_CLASS_NAME
+               + (agentMode_ ? AGENT_CLASS_INPUT : ""));
          pendingInput_.getElement().appendChild(pendingPrompt);
          pendingInput_.getElement().appendChild(pendingInput);
          pendingInput_.setVisible(true);
@@ -1342,4 +1347,8 @@ public class ShellWidget extends Composite implements ShellDisplay,
    private static final String RSTUDIO_CONSOLE_BUSY = "rstudio-console-busy";
    private static final String RSTUDIO_AGENT_MODE = "rstudio-agent-mode";
    private static final String RSTUDIO_CONSOLE_WAITING_FOR_INPUT = "rstudio-console-waiting-for-input";
+
+   // bioagent: current agent-mode state, mirrors the CSS class toggle so
+   // pending echoes can style themselves green
+   private boolean agentMode_ = false;
 }

@@ -38,13 +38,14 @@ public interface ThemeResources extends ClientBundle
    @Source("horizontalHandle.png")
    DataResource horizontalHandle();
 
-   @Source("rstudio_2x.png")
+   // AIR Studio: the toolbar logo is the huaji smiley
+   @Source("rstudio_2x_huaji.png")
    ImageResource rstudio2x();
    
-   @Source("rstudio_large_2x.png")
+   @Source("rstudio_2x_huaji.png")
    ImageResource rstudioLarge2x();
 
-   @Source("rstudio_small_2x.png")
+   @Source("rstudio_small_2x_huaji.png")
    ImageResource rstudio_small2x();
    
    @Source("backgroundGradient.png")
