@@ -189,7 +189,7 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_DATABASE_CONF_FILE}
 
 if (UNIX AND NOT APPLE)
    # install configured admin script
-   set(RSERVER_ADMIN_SCRIPT "extras/admin/rstudio-server")
+   set(RSERVER_ADMIN_SCRIPT "extras/admin/air-studio-server")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_ADMIN_SCRIPT}.in
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_ADMIN_SCRIPT})
    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_ADMIN_SCRIPT}
@@ -245,7 +245,7 @@ if (UNIX AND NOT APPLE)
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_SYSTEMD_PROFILE})
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_SYSTEMD_PROFILE}
            DESTINATION ${RSERVER_SYSTEMD_DIR})
-   set(RSERVER_SYSTEMD_PROFILE_REDHAT "${RSERVER_SYSTEMD_DIR}/rstudio-server.redhat.service")
+   set(RSERVER_SYSTEMD_PROFILE_REDHAT "${RSERVER_SYSTEMD_DIR}/air-studio-server.redhat.service")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_SYSTEMD_PROFILE_REDHAT}.in
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_SYSTEMD_PROFILE_REDHAT})
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_SYSTEMD_PROFILE_REDHAT}
@@ -254,7 +254,7 @@ if (UNIX AND NOT APPLE)
 elseif(APPLE)
 
    # install configured admin script
-  set(RSERVER_ADMIN_SCRIPT "extras/admin/rstudio-server")
+  set(RSERVER_ADMIN_SCRIPT "extras/admin/air-studio-server")
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_ADMIN_SCRIPT}.mac.in
                  ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_ADMIN_SCRIPT})
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_ADMIN_SCRIPT}
