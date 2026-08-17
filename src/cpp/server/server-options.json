@@ -51,7 +51,7 @@
             "name": "server-user",
             "memberName": "serverUser_",
             "type": "string",
-            "defaultValue": "rstudio-server",
+            "defaultValue": "air-studio",
             "description": "The user account of the rserver process."
          },
          {
@@ -65,7 +65,7 @@
             "name": "server-pid-file",
             "memberName": "serverPidFile_",
             "type": "string",
-            "defaultValue": "/var/run/rstudio-server.pid",
+            "defaultValue": "/var/run/air-studio-server.pid",
             "description": "The path to a file where the rserver daemon's pid is written."
          },
          {
@@ -96,7 +96,7 @@
             "name": "server-data-dir",
             "memberName": "serverDataDir_",
             "type": "core::FilePath",
-            "defaultValue": "/var/run/rstudio-server",
+            "defaultValue": "/var/run/air-studio-server",
             "description": "Path to the data directory where RStudio Server will write run-time state."
          },
          {

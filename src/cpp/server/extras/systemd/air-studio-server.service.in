@@ -1,14 +1,14 @@
 [Unit]
-Description=RStudio Server
+Description=AIR Studio Server
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=forking
-PIDFile=/run/rstudio-server.pid
+PIDFile=/run/air-studio-server.pid
 ExecStart=${CMAKE_INSTALL_PREFIX}/bin/rserver
 ExecReload=/bin/kill -HUP $MAINPID
-EnvironmentFile=-/etc/default/rstudio-server
+EnvironmentFile=-/etc/default/air-studio-server
 Restart=on-failure
 
 [Install]

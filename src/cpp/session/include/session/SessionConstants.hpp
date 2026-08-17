@@ -158,7 +158,7 @@
 #define kRunRprofileDefault  2
 
 #define kSessionTmpDirEnvVar       "RS_SESSION_TMP_DIR"
-#define kSessionTmpDir             "rstudio-rsession"
+#define kSessionTmpDir             "air-studio-rsession"
 
 #ifdef QUARTO_ENABLED
 # define kDefaultPandocPath        "bin/quarto/bin/tools"

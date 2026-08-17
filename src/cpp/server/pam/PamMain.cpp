@@ -77,7 +77,7 @@ int main(int argc, char * const argv[])
       // read username from command line
       std::string username(argv[1]);
 
-      std::string service("rstudio");
+      std::string service("air-studio");
       if (argc >= 3) {
         service = argv[2];
       }

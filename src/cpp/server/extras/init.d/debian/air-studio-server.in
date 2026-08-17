@@ -1,6 +1,6 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          rstudio-server
+# Provides:          air-studio-server
 # Required-Start:    $remote_fs
 # Required-Stop:     $remote_fs
 # Default-Start:     2 3 4 5
@@ -18,9 +18,9 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="RStudio Server"
 NAME=rserver
-PID_FILE=/var/run/rstudio-server.pid
+PID_FILE=/var/run/air-studio-server.pid
 DAEMON=${CMAKE_INSTALL_PREFIX}/bin/rserver
-SCRIPTNAME=/etc/init.d/rstudio-server
+SCRIPTNAME=/etc/init.d/air-studio-server
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0

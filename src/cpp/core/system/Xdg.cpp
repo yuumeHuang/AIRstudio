@@ -36,10 +36,10 @@
 #endif
 
 #ifdef _WIN32
-# define kRStudioDataFolderName "RStudio"
+# define kRStudioDataFolderName "AIR Studio"
 # define kRStudioCacheSuffix    "Cache"
 #else
-# define kRStudioDataFolderName "rstudio"
+# define kRStudioDataFolderName "air-studio"
 # define kRStudioCacheSuffix    ""
 #endif
 

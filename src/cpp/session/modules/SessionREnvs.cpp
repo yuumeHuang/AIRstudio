@@ -4,8 +4,8 @@
  * Copyright (C) 2026 by bioagent contributors
  *
  * Serves the conda R environment list for the toolbar environment switcher.
- * Entries come from /etc/rstudio/r-versions, which the
- * rstudio-conda-r-versions generator refreshes from public conda roots and
+ * Entries come from /etc/air-studio/r-versions, which the
+ * air-studio-conda-r-versions generator refreshes from public conda roots and
  * every user's personal env roots. Since this process runs as the session
  * user, entries under another user's home are filtered out: each user sees
  * public environments plus their own personal ones only.

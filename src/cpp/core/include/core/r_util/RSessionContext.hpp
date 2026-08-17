@@ -47,9 +47,9 @@
 #define kVSCodeExecutableName      "code-server"
 #define kPositronExecutableName    "positron"
 #define kJupyterPathEnvVar         "WORKBENCH_JUPYTER_PATH"
-#define kVSCodePathDefault         "/usr/lib/rstudio-server/bin/pwb-code-server/bin/code-server"
+#define kVSCodePathDefault         "/usr/lib/air-studio/bin/pwb-code-server/bin/code-server"
 #define kVSCodePathEnvVar          "WORKBENCH_VSCODE_PATH"
-#define kPositronPathDefault       "/usr/lib/rstudio-server/bin/positron-server/bin/positron-server"
+#define kPositronPathDefault       "/usr/lib/air-studio/bin/positron-server/bin/positron-server"
 #define kPositronPathEnvVar        "WORKBENCH_POSITRON_PATH"
 
 #ifdef _WIN32

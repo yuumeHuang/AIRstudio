@@ -166,7 +166,7 @@ ProgramStatus Options::read(int argc,
 
    // special program offline option (based on file existence at 
    // startup for easy bash script enable/disable of offline state)
-   serverOffline_ = FilePath("/var/lib/rstudio-server/offline").exists();
+   serverOffline_ = FilePath("/var/lib/air-studio-server/offline").exists();
 
    // generate monitor shared secret
    monitorSharedSecret_ = core::system::generateUuid();

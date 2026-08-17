@@ -10,13 +10,13 @@
 rserver="${CMAKE_INSTALL_PREFIX}/bin/rserver"
 prog=$(basename $rserver)
 
-lockfile=/var/lock/subsys/rstudio-server
+lockfile=/var/lock/subsys/air-studio-server
 
 # Exit if the package is not installed
 [ -x "$rserver" ] || exit 0
 
 start() {
-    echo -n $"Starting rstudio-server: "
+    echo -n $"Starting air-studio-server: "
     daemon $rserver
     retval=$?
     echo
@@ -25,7 +25,7 @@ start() {
 }
 
 stop() {
-    echo -n $"Stopping rstudio-server: "
+    echo -n $"Stopping air-studio-server: "
     killproc $prog
     retval=$?
     echo

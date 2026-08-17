@@ -197,7 +197,7 @@ if (UNIX AND NOT APPLE)
 
    # install configured debian init.d script
    set(RSERVER_INITD_DEBIAN_DIR "extras/init.d/debian")
-   set(RSERVER_INITD_DEBIAN_SCRIPT "${RSERVER_INITD_DEBIAN_DIR}/rstudio-server")
+   set(RSERVER_INITD_DEBIAN_SCRIPT "${RSERVER_INITD_DEBIAN_DIR}/air-studio-server")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_INITD_DEBIAN_SCRIPT}.in
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_INITD_DEBIAN_SCRIPT})
    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_INITD_DEBIAN_SCRIPT}
@@ -205,7 +205,7 @@ if (UNIX AND NOT APPLE)
 
    # install configured redhat init.d script
    set(RSERVER_INITD_REDHAT_DIR "extras/init.d/redhat")
-   set(RSERVER_INITD_REDHAT_SCRIPT "${RSERVER_INITD_REDHAT_DIR}/rstudio-server")
+   set(RSERVER_INITD_REDHAT_SCRIPT "${RSERVER_INITD_REDHAT_DIR}/air-studio-server")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_INITD_REDHAT_SCRIPT}.in
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_INITD_REDHAT_SCRIPT})
    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_INITD_REDHAT_SCRIPT}
@@ -213,7 +213,7 @@ if (UNIX AND NOT APPLE)
 
    # install configured suse init.d script
    set(RSERVER_INITD_SUSE_DIR "extras/init.d/suse")
-   set(RSERVER_INITD_SUSE_SCRIPT "${RSERVER_INITD_SUSE_DIR}/rstudio-server")
+   set(RSERVER_INITD_SUSE_SCRIPT "${RSERVER_INITD_SUSE_DIR}/air-studio-server")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_INITD_SUSE_SCRIPT}.in
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_INITD_SUSE_SCRIPT})
    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_INITD_SUSE_SCRIPT}
@@ -221,18 +221,18 @@ if (UNIX AND NOT APPLE)
 
    # install pam profile
    set(RSERVER_PAM_DIR "extras/pam")
-   set(RSERVER_PAM_PROFILE "${RSERVER_PAM_DIR}/rstudio")
+   set(RSERVER_PAM_PROFILE "${RSERVER_PAM_DIR}/air-studio")
    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_PAM_PROFILE}
            DESTINATION ${RSERVER_PAM_DIR})
 
    # install configured upstart profile
    set(RSERVER_UPSTART_DIR "extras/upstart")
-   set(RSERVER_UPSTART_PROFILE "${RSERVER_UPSTART_DIR}/rstudio-server.conf")
+   set(RSERVER_UPSTART_PROFILE "${RSERVER_UPSTART_DIR}/air-studio-server.conf")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_UPSTART_PROFILE}.in
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_UPSTART_PROFILE})
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_UPSTART_PROFILE}
            DESTINATION ${RSERVER_UPSTART_DIR})
-   set(RSERVER_UPSTART_PROFILE_REDHAT "${RSERVER_UPSTART_DIR}/rstudio-server.redhat.conf")
+   set(RSERVER_UPSTART_PROFILE_REDHAT "${RSERVER_UPSTART_DIR}/air-studio-server.redhat.conf")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_UPSTART_PROFILE_REDHAT}.in
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_UPSTART_PROFILE_REDHAT})
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_UPSTART_PROFILE_REDHAT}
@@ -240,7 +240,7 @@ if (UNIX AND NOT APPLE)
 
    # install configured systemd profile
    set(RSERVER_SYSTEMD_DIR "extras/systemd")
-   set(RSERVER_SYSTEMD_PROFILE "${RSERVER_SYSTEMD_DIR}/rstudio-server.service")
+   set(RSERVER_SYSTEMD_PROFILE "${RSERVER_SYSTEMD_DIR}/air-studio-server.service")
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${RSERVER_SYSTEMD_PROFILE}.in
                   ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_SYSTEMD_PROFILE})
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${RSERVER_SYSTEMD_PROFILE}

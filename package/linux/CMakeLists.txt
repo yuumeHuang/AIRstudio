@@ -62,8 +62,8 @@ endif()
 if(RSTUDIO_SERVER)
 
   # package name and description
-  set(CPACK_PACKAGE_NAME "rstudio-server")
-  set(CPACK_PACKAGE_DESCRIPTION "RStudio Server")
+  set(CPACK_PACKAGE_NAME "air-studio-server")
+  set(CPACK_PACKAGE_DESCRIPTION "AIR Studio Server")
 
   # debian control files
   set(DEBIAN_POSTINST postinst.in)

@@ -16,9 +16,9 @@
 #ifndef SERVER_CONSTANTS_HPP
 #define SERVER_CONSTANTS_HPP
 
-#define kServerLocalSocket            "rserver.socket"
+#define kServerLocalSocket            "air-rserver.socket"
 #define kServerLocalSocketPathEnvVar  "RS_SERVER_LOCAL_SOCKET_PATH"
-#define kServerTmpDir                 "rstudio-rserver"
+#define kServerTmpDir                 "air-studio-rserver"
 #define kServerDataDirEnvVar          "RS_SERVER_DATA_DIR"
 #define kServerTmpDirEnvVar           "RS_SERVER_TMP_DIR"
 

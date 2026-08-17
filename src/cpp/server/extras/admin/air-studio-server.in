@@ -5,11 +5,11 @@ daemonCmd() {
   if test "$INIT_SYSTEM" = "systemd"
   then
      eval "systemctl $1 rstudio-server.service"
-  elif test -e /etc/init/rstudio-server.conf
+  elif test -e /etc/init/air-studio-server.conf
   then
      eval "initctl $1 rstudio-server"
   else
-     eval "/etc/init.d/rstudio-server $1"
+     eval "/etc/init.d/air-studio-server $1"
   fi
   return $?
 }
@@ -126,14 +126,14 @@ case "$1" in
         ;;
 
     offline)
-        mkdir -p /var/lib/rstudio-server
-        touch /var/lib/rstudio-server/offline
+        mkdir -p /var/lib/air-studio-server
+        touch /var/lib/air-studio-server/offline
         daemonCmd "restart"
         ;;
 
     online)
-        mkdir -p /var/lib/rstudio-server
-        rm -f /var/lib/rstudio-server/offline
+        mkdir -p /var/lib/air-studio-server
+        rm -f /var/lib/air-studio-server/offline
         daemonCmd "restart"
         ;;
 
@@ -151,7 +151,7 @@ case "$1" in
         ;;
 
     *)
-        echo $"Usage: rstudio-server {status|start|stop|restart|test-config|check-config|setup-db|verify-installation|suspend-session|suspend-all|force-suspend-session|force-suspend-all|kill-session|kill-all|offline|online|active-sessions|version}"
+        echo $"Usage: air-studio-server {status|start|stop|restart|test-config|check-config|setup-db|verify-installation|suspend-session|suspend-all|force-suspend-session|force-suspend-all|kill-session|kill-all|offline|online|active-sessions|version}"
         exit 2
 esac
 

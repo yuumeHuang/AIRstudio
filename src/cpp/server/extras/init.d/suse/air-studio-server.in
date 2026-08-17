@@ -11,7 +11,7 @@
 ### END INIT INFO
 
 # Check for missing binaries
-PID_FILE=/var/run/rstudio-server.pid
+PID_FILE=/var/run/air-studio-server.pid
 RSERVER_BIN="${CMAKE_INSTALL_PREFIX}/bin/rserver"
 test -x $RSERVER_BIN || { echo "$RSERVER_BIN not installed";
 	if [ "$1" = "stop" ]; then exit 0;

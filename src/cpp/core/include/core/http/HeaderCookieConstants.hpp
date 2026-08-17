@@ -22,12 +22,12 @@
 // docs/server/access_and_security/header_cookie_dictionary.qmd
 
 // Cookie Constants ================================================================================
-constexpr const char* kCSRFTokenCookie = "rs-csrf-token";
+constexpr const char* kCSRFTokenCookie = "air-csrf-token";
 constexpr const char* kLegacyCookieSuffix = "-legacy";
-constexpr const char* kPersistAuthCookie = "persist-auth";
-constexpr const char* kPortTokenCookie = "port-token";
-constexpr const char* kUserIdCookie = "user-id";
-constexpr const char* kUserListCookie = "user-list-id";
+constexpr const char* kPersistAuthCookie = "air-persist-auth";
+constexpr const char* kPortTokenCookie = "air-port-token";
+constexpr const char* kUserIdCookie = "air-user-id";
+constexpr const char* kUserListCookie = "air-user-list-id";
 
 // NOTE: Remove block when Ghost Orchid 2021.09 is not supported ===================================
 constexpr const char* kOldCSRFTokenCookie = "csrf-token";

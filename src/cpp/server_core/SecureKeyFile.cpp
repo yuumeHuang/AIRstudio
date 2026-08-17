@@ -119,7 +119,7 @@ core::Error readSecureKeyFile(const std::string& filename,
    core::FilePath secureKeyPath = core::system::xdg::findSystemConfigFile(
          "secure key", filename);
    if (!secureKeyPath.exists())
-      secureKeyPath = core::FilePath("/var/lib/rstudio-server")
+      secureKeyPath = core::FilePath("/var/lib/air-studio-server")
          .completePath(filename);
 
    bool secureKeyExists = secureKeyPath.exists();
@@ -174,7 +174,7 @@ core::FilePath systemKeyFilePath(const std::string& filename)
    // INFO-logging findSystemConfigFile would emit a line on every miss
    core::FilePath path = core::system::xdg::systemConfigFile(filename);
    if (!path.exists())
-      path = core::FilePath("/var/lib/rstudio-server").completePath(filename);
+      path = core::FilePath("/var/lib/air-studio-server").completePath(filename);
    return path;
 }
 

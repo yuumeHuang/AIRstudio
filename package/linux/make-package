@@ -174,7 +174,7 @@ if [ "$RSTUDIO_TARGET" = "Desktop" ] || [ "$RSTUDIO_TARGET" == "Electron" ]
 then
   INSTALL_DIR=rstudio
 else
-  INSTALL_DIR=rstudio-server
+  INSTALL_DIR=air-studio
 fi
 
 ELECTRON_SOURCE_DIR="${PKG_DIR}/../../src/node/desktop"
