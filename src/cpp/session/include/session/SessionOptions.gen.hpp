@@ -116,7 +116,7 @@ protected:
       value<std::string>(&wwwSymbolMapsPath_)->default_value("www-symbolmaps"),
       "The relative path from the RStudio installation directory, or absolute path, where symbol maps are stored.")
       (kWwwPortSessionOption,
-      value<std::string>(&wwwPort_)->default_value("8787"),
+      value<std::string>(&wwwPort_)->default_value("7878"),
       "The HTTP port to listen on for incoming connections. This is generally only used with Launcher sessions.")
       (kWwwAddressSessionOption,
       value<std::string>(&wwwAddress_)->default_value("127.0.0.1"),

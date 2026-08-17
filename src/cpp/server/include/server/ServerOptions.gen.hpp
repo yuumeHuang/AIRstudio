@@ -77,13 +77,13 @@ protected:
       value<std::string>(&serverWorkingDir_)->default_value("/"),
       "The default working directory of the rserver process.")
       ("server-user",
-      value<std::string>(&serverUser_)->default_value("rstudio-server"),
+      value<std::string>(&serverUser_)->default_value("air-studio"),
       "The user account of the rserver process.")
       ("server-daemonize",
       value<bool>(&serverDaemonize_)->default_value(core::system::effectiveUserIsRoot()),
       "Indicates whether or not the rserver process should run as a daemon.")
       ("server-pid-file",
-      value<std::string>(&serverPidFile_)->default_value("/var/run/rstudio-server.pid"),
+      value<std::string>(&serverPidFile_)->default_value("/var/run/air-studio-server.pid"),
       "The path to a file where the rserver daemon's pid is written.")
       ("server-app-armor-enabled",
       value<bool>(&deprecatedServerAppArmorEnabled_)->default_value(false),
@@ -95,7 +95,7 @@ protected:
       value<std::string>(&secureCookieKeyFile_)->default_value(""),
       "If set, overrides the default path of the secure-cookie-key file used for encrypting cookies.")
       ("server-data-dir",
-      value<std::string>(&serverDataDir_)->default_value("/var/run/rstudio-server"),
+      value<std::string>(&serverDataDir_)->default_value("/var/run/air-studio-server"),
       "Path to the data directory where RStudio Server will write run-time state.")
       ("server-add-header",
       value<std::vector<std::string>>(&serverAddHeaders_)->default_value(std::vector<std::string>())->multitoken(),
