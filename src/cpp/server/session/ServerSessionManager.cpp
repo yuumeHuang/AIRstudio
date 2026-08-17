@@ -159,6 +159,16 @@ core::system::ProcessConfig sessionProcessConfig(
    // pass our uid to instruct rsession to limit rpc clients to us and itself
    core::system::Options environment;
    environment.insert(environment.end(), extraEnvironment.begin(), extraEnvironment.end());
+   // AIR Studio: forward the operator-configured LLM gateway variables to
+   // rsession so the bioagent chat backend inherits them (the explicit
+   // environment below replaces the parent env, not merges with it)
+   core::system::Options parentEnv;
+   core::system::environment(&parentEnv);
+   for (const auto& kv : parentEnv)
+   {
+      if (kv.first.compare(0, 9, "BIOAGENT_") == 0)
+         environment.push_back(kv);
+   }
    uid_t uid = core::system::user::currentUserIdentity().userId;
    environment.push_back(std::make_pair(
                            kRStudioLimitRpcClientUid,
