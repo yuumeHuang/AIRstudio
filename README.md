@@ -1,53 +1,68 @@
-RStudio
-=============================================================================
+# AIR Studio
 
-RStudio is an integrated development environment (IDE) for the
-[R programming language](https://www.r-project.org). Some of its
-features include:
+**AI-augmented R analysis environment** — a fork of [Posit RStudio Server](https://github.com/rstudio/rstudio) (AGPLv3) with a built-in AI coding agent and per-user conda R-environment switching.
 
-- Customizable workbench with all of the tools required to work with R in one
-  place (console, terminal, source, plots, environment, history, help, files,
-  packages, etc.).
-- Syntax highlighting editor with code completion.
-- Execute code directly from the source editor (line, selection, or file).
-- Authoring of reproducible documents and reports with Quarto and R Markdown.
-- Optional AI features, including GitHub Copilot completions, Posit AI Next
-  Edit Suggestions, and the [Posit Assistant](https://assistant.posit.co/).
-- Support for authoring Sweave and TeX documents.
-- Runs on Windows, Mac, and Linux, and has a community-maintained
-  [FreeBSD port](https://www.freshports.org/devel/RStudio/).
-- Can also be run as a server, enabling multiple users to access the RStudio
-  IDE using a web browser.
+AIR Studio installs **standalone** next to any existing RStudio Server on the same host: its own port (`7878`), paths (`/usr/lib/air-studio`, `/etc/air-studio`, `~/.local/share/air-studio`), service (`air-studio-server.service`), PAM profile, and auth cookies. Nothing collides.
 
-For more information on RStudio please visit the
-[project website](https://posit.co/products/open-source/rstudio).
+## Features over stock RStudio Server
 
-Getting the Code
------------------------------------------------------------------------------
+- **Console AI agent** — press `Shift+Tab` in the console to toggle agent mode. The prompt and input turn green; agent replies render with a light-blue background; R commands the agent executes use the normal console styling. Ships as a self-contained Node bundle (no npm install at runtime).
+- **Conda R-environment switcher** — toolbar dropdown lists public environments (e.g. `/opt/miniforge3/envs/*`) and each user's personal environments (`~/{miniconda3,miniforge3,anaconda3,.conda}/envs/*`, filtered per user). Switching restarts the session in the selected R; the choice persists per user. A systemd timer rescans every 5 minutes.
+- **AIR Studio branding** — product title, tab title, and toolbar logo.
 
-RStudio is licensed under the AGPLv3, the terms of which are included in
-the file COPYING. You can find our source code repository on GitHub at [https://github.com/rstudio/rstudio](https://github.com/rstudio/rstudio).
+## Install
 
-Documentation
------------------------------------------------------------------------------
+```bash
+sudo dpkg -i air-studio-server_<ver>_amd64.deb air-studio-extras_<ver>_amd64.deb
+```
 
-For information on how to use RStudio, see the
-[RStudio User Guide](https://docs.posit.co/ide/user/).
+`air-studio-extras` depends on the exact `air-studio-server` version (the chat protocol is version-matched); install both from the same release.
 
-See also the following files included with the distribution:
+### Configure the LLM gateway (required)
 
-- COPYING - RStudio license (AGPLv3)
-- NOTICE  - Additional open source software included with RStudio
-- SOURCE  - How to obtain the source code for RStudio
-- INSTALL - How to build and install RStudio from source
+AIR Studio ships **without a bundled LLM provider**. Point it at any OpenAI-compatible endpoint:
 
-If you have problems or want to share feedback with us please visit our
-[community forum](https://forum.posit.co/c/rstudio-ide). For other
-inquiries you can also email us at [info@posit.co](mailto:info@posit.co).
+```bash
+sudo systemctl edit air-studio-server
+```
 
-Contributing
------------------------------------------------------------------------------
+```ini
+[Service]
+Environment=BIOAGENT_BASE_URL=http://your-gateway:8000/v1
+Environment=BIOAGENT_API_KEY=your-key
+Environment=BIOAGENT_MODEL=your-model
+```
 
-We welcome contributions to RStudio. Please see
-[CONTRIBUTING.md](CONTRIBUTING.md) for details on filing bugs, requesting
-enhancements, and submitting code.
+```bash
+sudo systemctl restart air-studio-server
+```
+
+Optional tuning: `BIOAGENT_CONTEXT_TOKENS` (default 131072), `BIOAGENT_OUTPUT_TOKENS` (default 32768). Works with vLLM, OneAPI, OpenRouter, DeepSeek, and any `/v1/chat/completions` endpoint. Without these variables the agent backend refuses to start with an actionable message.
+
+## Building from source
+
+```bash
+git clone git@github.com:yuumeHuang/AIRstudio.git
+cd AIRstudio
+RSTUDIO_VERSION_MAJOR=2026 RSTUDIO_VERSION_MINOR=05 RSTUDIO_VERSION_PATCH=1 \
+RSTUDIO_VERSION_SUFFIX='+225' RSTUDIO_BOOST_REQUESTED_VERSION=1.91.0 \
+RSTUDIO_NODE_VERSION=22.22.2 \
+./package/linux/make-package Server DEB
+```
+
+The extras package (agent backend + conda machinery) builds from the same tree: `conda-r-versions/build-extras.sh <version>` after building the bioagent bundle (`cd bioagent && bun build src/main.ts --target=node --outdir=dist/server`).
+
+## Layout
+
+| Component | Path |
+|---|---|
+| Binaries | `/usr/lib/air-studio/bin/` |
+| Config | `/etc/air-studio/` |
+| Agent backend | `/opt/air-studio/bioagent/` (symlinked into `/etc/air-studio/pai/bin`) |
+| Env scanner | `/usr/local/sbin/air-studio-conda-r-versions` + systemd timer |
+| User data | `~/.local/share/air-studio/` |
+| Listen port | `7878` (configurable via `www-port` in `/etc/air-studio/rserver.conf`) |
+
+## License
+
+The RStudio Server code this project forks is AGPLv3 (see `COPYING`); modifications carry the same license. The toolbar logo is a placeholder — replace `rstudio_2x_huaji.png` if you redistribute.
