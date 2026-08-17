@@ -718,12 +718,12 @@ void Options::resolveCopilotPath(const FilePath& resourcePath, std::string* pPat
 
 void Options::resolveNodePath(const FilePath& resourcePath, std::string* pPath)
 {
-#if defined(__linux__) && !defined(RSTUDIO_PACKAGE_BUILD)
-   FilePath dependenciesPath = resourcePath.completePath("../../dependencies/common/node/" RSTUDIO_INSTALLED_NODE_VERSION "-installed");
-   resolvePath(dependenciesPath, pPath);
-#else
-   resolvePath(resourcePath, pPath);
-#endif
+// bioagent: this rsession is built from source but installed into the
+// official package layout (/usr/lib/rstudio-server/bin/rsession), so node
+// must resolve from the resource path (bin/node) like a package build;
+// the dev-tree ../../dependencies lookup only applies when running the
+// binary straight out of a build directory
+resolvePath(resourcePath, pPath);
 }
 
 void Options::resolveRsclangPath(const FilePath& resourcePath,

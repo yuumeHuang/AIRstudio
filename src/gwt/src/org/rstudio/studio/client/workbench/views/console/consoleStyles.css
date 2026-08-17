@@ -198,12 +198,18 @@
 }
 
 /* Styling for agent-generated console output */
-.rstudio-agent-input {
+/* echoed agent input keeps the agent green despite the ace_keyword class
+   (same doubled-selector trick as the live input styling) */
+.rstudio-agent-input.rstudio-agent-input {
    font-style: italic;
+   color: #3fb950 !important;
 }
 
 /* bioagent: agent mode (Shift+Tab) tints the prompt and input green */
-.rstudio-agent-mode .ace_keyword {
+.rstudio-agent-mode .ace_text-layer {
+   color: #3fb950 !important;
+}
+.rstudio-agent-mode.rstudio-agent-mode.ace_keyword {
    color: #3fb950 !important;
 }
 
@@ -218,13 +224,6 @@
    padding: 0 4px;
 }
 
-/* bioagent: agent mode (Shift+Tab) tints the prompt and input green */
-.rstudio-agent-mode .ace_keyword {
-   color: #3fb950 !important;
-}
-
-/* bioagent: agent prose replies rendered with a light blue background,
-   distinguishing them from R output while staying inline in the console */
 .rstudio-agent-prose {
    background-color: rgba(80, 160, 220, 0.14);
    display: inline-block;
