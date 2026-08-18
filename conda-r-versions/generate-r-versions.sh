@@ -45,16 +45,18 @@ for root in "${PUBLIC_ROOTS[@]}"; do
    done
 done
 
-for homedir in /home/*/; do
-   user=$(basename "$homedir")
+# Personal envs: enumerate real user homes from passwd (covers non-standard
+# home bases like /home-ssd/<user>), not just /home/*.
+while read -r user homedir; do
+   [ -d "$homedir" ] || continue
    for rel in "${HOME_ENV_RELS[@]}"; do
-      [ -d "$homedir$rel" ] || continue
-      for env in "$homedir$rel"/*/; do
+      [ -d "$homedir/$rel" ] || continue
+      for env in "$homedir/$rel"/*/; do
          [ -d "$env" ] || continue
          add_env "$env" "conda: $user/$(basename "${env%/}") (personal)"
       done
    done
-done
+done < <(getent passwd | awk -F: '$3 >= 1000 && $3 < 65534 && $6 != "/nonexistent" {print $1, $6}' | sort -u)
 
 tmp=$(mktemp)
 trap 'rm -f "$tmp"' EXIT

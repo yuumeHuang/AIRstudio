@@ -131,9 +131,13 @@ Error getCondaRVersions(const json::JsonRpcRequest& request,
          std::string homeDir = core::system::userHomePath().getAbsolutePath();
          for (const EnvEntry& entry : parseEnvEntries(contents))
          {
-            // personal environments of other users are not accessible to
-            // this session user; show public envs plus the user's own
-            if (startsWith(entry.path, "/home/") && !startsWith(entry.path, homeDir + "/"))
+            // personal environments of other users are not accessible to this
+            // session user; show public envs plus the user's own. Ownership is
+            // taken from the scanner label ("... (personal)"), not the path
+            // prefix, so non-standard home bases (/home-ssd/<u>) work too.
+            bool personal = entry.label.find("(personal)") != std::string::npos;
+            bool own = startsWith(entry.path, homeDir + "/");
+            if (personal && !own)
                continue;
 
             json::Object env;
@@ -141,7 +145,7 @@ Error getCondaRVersions(const json::JsonRpcRequest& request,
             env["path"] = entry.path;
             env["version"] = entry.version;
             env["r_home"] = entry.path + "/lib/R";
-            env["personal"] = startsWith(entry.path, homeDir + "/");
+            env["personal"] = personal && own;
             result.push_back(std::move(env));
          }
       }
