@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# rsession-conda-wrapper for the STOCK Posit RStudio Server (rserver.conf
+# rsession-path). Shipped by air-studio-extras so that installing AIR
+# Studio alongside RStudio never breaks the stock deployment: this path
+# is shared, so extras keeps it pointing at the stock rsession and stock
+# user-state dirs (~/.local/share/rstudio).
+#
+# Per-user conda environment switching, same resolution order as the AIR
+# Studio wrapper:
+#   1. most recent active session's properites/r-version-home
+#   2. user default rversion-settings/defaultRVersionHome
+#   3. rserver-provided environment (system R)
+set -u
+RSESSION=/usr/lib/rstudio-server/bin/rsession
+user=""
+prev=""
+for a in "$@"; do
+   case "$a" in
+      -u) prev="u" ; continue ;;
+      -u?*) user="${a#-u}" ; break ;;
+      *) if [ "$prev" = "u" ]; then user="$a"; break; fi ;;
+   esac
+done
+rhome=""
+if [ -n "$user" ]; then
+   home="/home/$user"
+   sd=$(ls -1dt "$home"/.local/share/rstudio/sessions/active/session-*/ 2>/dev/null | head -1)
+   if [ -n "${sd:-}" ] && [ -f "$sd/properites/r-version-home" ]; then
+      rh=$(cat "$sd/properites/r-version-home" 2>/dev/null)
+      [ -d "$rh" ] && rhome="$rh"
+   fi
+   if [ -z "$rhome" ] && [ -f "$home/.local/share/rstudio/rversion-settings/defaultRVersionHome" ]; then
+      rh=$(cat "$home/.local/share/rstudio/rversion-settings/defaultRVersionHome" 2>/dev/null)
+      [ -d "$rh" ] && rhome="$rh"
+   fi
+fi
+if [ -n "$rhome" ] && [ "$rhome" != "${R_HOME:-}" ] && [ -f "$rhome/lib/libR.so" ]; then
+   export RSTUDIO_SYSTEM_R_HOME="${R_HOME:-}"
+   export R_HOME="$rhome"
+   export LD_LIBRARY_PATH="$rhome/lib:${LD_LIBRARY_PATH:-}"
+fi
+logger -t rsession-wrapper "user=$user rhome=$rhome"
+exec "$RSESSION" "$@"

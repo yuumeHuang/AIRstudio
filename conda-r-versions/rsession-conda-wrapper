@@ -1,22 +1,15 @@
 #!/usr/bin/env bash
-# rsession-conda-wrapper: rsession launcher that selects the user's chosen
-# conda R environment, installed as rserver.conf rsession-path.
+# AIR Studio rsession launcher: selects the user's chosen conda R
+# environment. Installed as /usr/lib/air-studio/bin/rsession-conda-wrapper
+# and referenced by /etc/air-studio/rserver.conf (rsession-path).
 #
-# rserver always launches rsession with the globally configured R; per-user
-# environment switching (public conda envs + each user's personal ones) is
-# implemented here. The SessionREnvs rsession module persists the user's
-# choice on the active session (properites/r-version-home) and in the
-# user-level default (rversion-settings/defaultRVersionHome); this wrapper
-# reads it and starts rsession against that R.
-#
-# Resolution order:
+# The user's choice is persisted by the SessionREnvs rsession module:
 #   1. most recent active session's properites/r-version-home (per-session)
 #   2. user default rversion-settings/defaultRVersionHome (new sessions)
 #   3. rserver-provided environment (system R)
+# All user state lives under ~/.local/share/air-studio (AIR Studio XDG dir).
 set -u
-
 RSESSION=/usr/lib/air-studio/bin/rsession
-
 user=""
 prev=""
 for a in "$@"; do
@@ -26,11 +19,10 @@ for a in "$@"; do
       *) if [ "$prev" = "u" ]; then user="$a"; break; fi ;;
    esac
 done
-
 rhome=""
 if [ -n "$user" ]; then
    home="/home/$user"
-   sd=$(ls -1dt "$home"/.local/share/rstudio/sessions/active/session-*/ 2>/dev/null | head -1)
+   sd=$(ls -1dt "$home"/.local/share/air-studio/sessions/active/session-*/ 2>/dev/null | head -1)
    if [ -n "${sd:-}" ] && [ -f "$sd/properites/r-version-home" ]; then
       rh=$(cat "$sd/properites/r-version-home" 2>/dev/null)
       [ -d "$rh" ] && rhome="$rh"
@@ -40,12 +32,10 @@ if [ -n "$user" ]; then
       [ -d "$rh" ] && rhome="$rh"
    fi
 fi
-
 if [ -n "$rhome" ] && [ "$rhome" != "${R_HOME:-}" ] && [ -f "$rhome/lib/libR.so" ]; then
    export RSTUDIO_SYSTEM_R_HOME="${R_HOME:-}"
    export R_HOME="$rhome"
    export LD_LIBRARY_PATH="$rhome/lib:${LD_LIBRARY_PATH:-}"
 fi
-
-logger -t rsession-wrapper "user=$user rhome=$rhome"
+logger -t air-studio-rsession-wrapper "user=$user rhome=$rhome"
 exec "$RSESSION" "$@"

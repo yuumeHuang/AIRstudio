@@ -52,9 +52,17 @@ Unit=air-studio-conda-r-versions.service
 WantedBy=timers.target
 UNIT
 
-# 3. rsession wrapper
-mkdir -p "$PKG/usr/local/bin"
-cp "$SRC/conda-r-versions/rsession-conda-wrapper" "$PKG/usr/local/bin/"
+# 3. rsession wrappers
+#    /usr/lib/air-studio/bin/... : AIR Studio's own launcher (air rserver.conf)
+#    /usr/local/bin/rsession-conda-wrapper : stock RStudio Server launcher.
+#      extras owns this shared path and keeps it targeting the STOCK rsession
+#      so installing AIR Studio alongside RStudio cannot break the stock
+#      deployment (regression: air wrapper here launched air rsession under
+#      the stock rserver -> auth cookie mismatch -> agent WS "connect timeout").
+mkdir -p "$PKG/usr/lib/air-studio/bin" "$PKG/usr/local/bin"
+cp "$SRC/conda-r-versions/rsession-conda-wrapper" "$PKG/usr/lib/air-studio/bin/"
+chmod 755 "$PKG/usr/lib/air-studio/bin/rsession-conda-wrapper"
+cp "$SRC/conda-r-versions/rsession-conda-wrapper-rstudio" "$PKG/usr/local/bin/rsession-conda-wrapper"
 chmod 755 "$PKG/usr/local/bin/rsession-conda-wrapper"
 
 # 4. control files
@@ -83,9 +91,12 @@ ln -sfn /opt/air-studio/bioagent /etc/air-studio/pai/bin
 # start the conda env discovery timer
 systemctl daemon-reload
 systemctl enable --now air-studio-conda-r-versions.timer 2>/dev/null || true
-# wire the rsession wrapper unless the admin already customized rserver.conf
-if ! grep -q '^rsession-path' /etc/air-studio/rserver.conf 2>/dev/null; then
-  printf '\nrsession-path=/usr/local/bin/rsession-conda-wrapper\n' >> /etc/air-studio/rserver.conf
+# wire the AIR rsession wrapper; migrate installs that previously pointed
+# at the shared /usr/local/bin path (which now targets the stock rsession)
+if grep -q '^rsession-path=/usr/local/bin/rsession-conda-wrapper$' /etc/air-studio/rserver.conf 2>/dev/null; then
+  sed -i 's|^rsession-path=/usr/local/bin/rsession-conda-wrapper$|rsession-path=/usr/lib/air-studio/bin/rsession-conda-wrapper|' /etc/air-studio/rserver.conf
+elif ! grep -q '^rsession-path' /etc/air-studio/rserver.conf 2>/dev/null; then
+  printf '\nrsession-path=/usr/lib/air-studio/bin/rsession-conda-wrapper\n' >> /etc/air-studio/rserver.conf
 fi
 echo 'AIR Studio extras installed.'
 echo 'Configure the LLM gateway (OpenAI-compatible):'
