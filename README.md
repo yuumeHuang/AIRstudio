@@ -61,6 +61,16 @@ The agent tracks context usage per conversation and compacts automatically:
 
 Thresholds are tunable via `BIOAGENT_SUGGEST_PCT` / `BIOAGENT_AUTO_COMPACT_PCT` (fractions, default 0.6 / 0.8); window size via `BIOAGENT_CONTEXT_TOKENS` (default 131072).
 
+### Interrupting, queueing, and steering
+
+While the agent is working on a turn:
+
+- **Enter** — submits your message to the queue; it runs when the current turn finishes (messages run in arrival order)
+- **Shift+Enter** — *steers*: interrupts the current turn immediately and submits your message right away; already-queued messages keep their places and run after it
+- **Esc Esc** (double-press within 500 ms) — interrupts the current turn *and* discards queued messages; the partial reply is kept in the conversation
+
+Interrupting also stops any in-flight R execution started by the agent. The backend acknowledges each action inline (`[queued] …`, `[interrupted — N queued message(s) discarded]`).
+
 ## Building from source
 
 ```bash

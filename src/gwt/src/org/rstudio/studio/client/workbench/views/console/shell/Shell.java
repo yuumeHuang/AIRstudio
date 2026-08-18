@@ -483,7 +483,7 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
       Debug.log("bioagent: agent mode " + (agentMode_ ? "enabled" : "disabled"));
    }
 
-   private void processAgentCommandEntry()
+   private void processAgentCommandEntry(boolean immediate)
    {
       String commandText = view_.processCommandEntry();
       if (commandText.trim().length() == 0)
@@ -491,7 +491,7 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
       if (addToHistory_ && commandText.length() > 0)
          eventBus_.fireEvent(new ConsoleHistoryAddedEvent(commandText));
       view_.consoleWriteInput(commandText + "\n", "", true);
-      chatBridge_.send(commandText);
+      chatBridge_.send(commandText, immediate);
    }
 
    boolean isAgentMode()
@@ -703,6 +703,10 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
    // bioagent: agent mode state. Toggled with Shift+Tab; Enter routes to
    // the chat backend (bioagent) instead of the R interpreter.
    private boolean agentMode_ = false;
+   // bioagent: timestamp of the previous Esc press in agent mode, for the
+   // double-Esc agent interrupt
+   private long lastAgentEscTime_ = 0;
+   private static final int DOUBLE_ESC_MS = 500;
    private ChatBridge chatBridge_;
 
    private final class InputKeyHandler implements KeyDownHandler,
@@ -781,6 +785,16 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
                navigateHistory(1);
             }
          }
+         else if (keyCode == KeyCodes.KEY_ENTER && agentMode_ &&
+                  modifiers == KeyboardShortcut.SHIFT)
+         {
+            // bioagent: Shift+Enter steers - interrupts the running agent
+            // turn and submits this message immediately
+            event.preventDefault();
+            event.stopPropagation();
+            restoreFocus_ = true;
+            processAgentCommandEntry(true);
+         }
          else if (keyCode == KeyCodes.KEY_ENTER && (
                      modifiers == 0 ||
                      modifiers == KeyboardShortcut.CTRL ||
@@ -788,10 +802,9 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
          {
             event.preventDefault();
             event.stopPropagation();
-
             restoreFocus_ = true;
             if (agentMode_)
-               processAgentCommandEntry();
+               processAgentCommandEntry(false);
             else
                processCommandEntry();
          }
@@ -803,8 +816,35 @@ public class Shell implements ConsoleHistoryAddedEvent.Handler,
                      keyCode == KeyCodes.KEY_C)))
          {
             event.preventDefault();
-
-            if (input_.getText().length() == 0)
+            if (agentMode_ && input_.getText().length() == 0)
+            {
+               // bioagent: pressing Esc twice within DOUBLE_ESC_MS interrupts
+               // the running agent turn (and any R code it started)
+               long now = System.currentTimeMillis();
+               if (now - lastAgentEscTime_ < DOUBLE_ESC_MS)
+               {
+                  lastAgentEscTime_ = 0;
+                  chatBridge_.interrupt();
+                  server_.interrupt(new ServerRequestCallback<Boolean>()
+                  {
+                     @Override
+                     public void onResponseReceived(Boolean busy)
+                     {
+                     }
+                     @Override
+                     public void onError(ServerError error)
+                     {
+                        Debug.logError(error);
+                     }
+                  });
+               }
+               else
+               {
+                  lastAgentEscTime_ = now;
+               }
+               input_.clear();
+            }
+            else if (input_.getText().length() == 0)
             {
                // interrupt server
                server_.interrupt(new ServerRequestCallback<Boolean>()

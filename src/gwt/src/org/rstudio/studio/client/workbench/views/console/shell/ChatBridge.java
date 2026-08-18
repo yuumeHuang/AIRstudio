@@ -44,12 +44,22 @@ public class ChatBridge
 
    public void send(String text)
    {
+      send(text, false);
+   }
+
+   /**
+    * @param immediate true to steer: interrupt the running agent turn and
+    * submit this message right away (Shift+Enter). False queues the message
+    * behind the running turn (Enter).
+    */
+   public void send(String text, final boolean immediate)
+   {
       ensureConnected(new ConnectedCallback()
       {
          @Override
          public void onConnected()
          {
-            sendRaw(text);
+            sendRaw(text, immediate);
          }
 
          @Override
@@ -58,6 +68,17 @@ public class ChatBridge
             display_.onAgentProse("[bioagent unavailable: " + error + "]\n", true);
          }
       });
+   }
+
+   /**
+    * Interrupt the running agent turn (Esc Esc). Only meaningful with an
+    * open socket; silently ignored otherwise so Esc-Esc never spins up a
+    * backend on its own.
+    */
+   public void interrupt()
+   {
+      if (isSocketOpen())
+         sendInterruptRaw();
    }
 
    private void ensureConnected(final ConnectedCallback cb)
@@ -182,9 +203,13 @@ public class ChatBridge
       return s != null && s.readyState === 1;
    }-*/;
 
-   private native void sendRaw(String text) /*-{
+   private native void sendRaw(String text, boolean immediate) /*-{
       this.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::sock.send(
-         JSON.stringify({ type: "user_message", text: text }));
+         JSON.stringify({ type: "user_message", text: text, immediate: immediate }));
+   }-*/;
+   private native void sendInterruptRaw() /*-{
+      this.@org.rstudio.studio.client.workbench.views.console.shell.ChatBridge::sock.send(
+         JSON.stringify({ type: "interrupt" }));
    }-*/;
 
    private void onOpen()
@@ -209,6 +234,20 @@ public class ChatBridge
          if ("error".equals(type))
          {
             display_.onAgentProse("[bioagent error: " + str(root, "message") + "]\n", true);
+            return;
+         }
+         if ("queued".equals(type))
+         {
+            JSONValue pos = root.isObject().get("position");
+            String tag = pos != null && pos.isNumber() != null
+               ? " #" + (int) pos.isNumber().doubleValue()
+               : "";
+            display_.onAgentProse("[queued" + tag + "] " + str(root, "text") + "\n", true);
+            return;
+         }
+         if ("notice".equals(type))
+         {
+            display_.onAgentProse(str(root, "text") + "\n", true);
             return;
          }
          if (!"agent_event".equals(type))
