@@ -18,9 +18,9 @@ sudo dpkg -i air-studio-server_<ver>_amd64.deb air-studio-extras_<ver>_amd64.deb
 
 `air-studio-extras` depends on the exact `air-studio-server` version (the chat protocol is version-matched); install both from the same release.
 
-### Configure the LLM gateway (required)
+### Configure the LLM gateway (operator default, optional)
 
-AIR Studio ships **without a bundled LLM provider**. Point it at any OpenAI-compatible endpoint:
+The admin can set a server-wide default provider via any OpenAI-compatible endpoint:
 
 ```bash
 sudo systemctl edit air-studio-server
@@ -37,7 +37,19 @@ Environment=BIOAGENT_MODEL=your-model
 sudo systemctl restart air-studio-server
 ```
 
-Optional tuning: `BIOAGENT_CONTEXT_TOKENS` (default 131072), `BIOAGENT_OUTPUT_TOKENS` (default 32768). Works with vLLM, OneAPI, OpenRouter, DeepSeek, and any `/v1/chat/completions` endpoint. Without these variables the agent backend refuses to start with an actionable message.
+Optional tuning: `BIOAGENT_CONTEXT_TOKENS` (default 131072), `BIOAGENT_OUTPUT_TOKENS` (default 32768). Works with vLLM, OneAPI, OpenRouter, DeepSeek, and any `/v1/chat/completions` endpoint.
+
+### Per-user providers (console commands)
+
+Each user can manage their own providers in agent mode (`Shift+Tab`) — no admin needed, takes precedence over the server default:
+
+```
+addprovider("http://your-gateway:8000/v1", "api-key")   # add; auto-lists & activates first model
+showmodel("your-gateway")                               # list models ([x] = active)
+setmodel("your-gateway", "model-id")                    # pick model & activate
+```
+
+Bare `addprovider()` / `showmodel()` print the current state. Registry: `~/.config/air-studio/llm-providers.json` (0600). Without any provider configured, the agent answers with setup guidance instead of failing.
 
 ## Building from source
 
