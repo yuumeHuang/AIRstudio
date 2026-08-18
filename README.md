@@ -51,6 +51,16 @@ setmodel("your-gateway", "model-id")                    # pick model & activate
 
 Bare `addprovider()` / `showmodel()` print the current state. Registry: `~/.config/air-studio/llm-providers.json` (0600). Without any provider configured, the agent answers with setup guidance instead of failing.
 
+### Context management
+
+The agent tracks context usage per conversation and compacts automatically:
+
+- **≥ 60%** of the context window: a one-line notice suggests `/compact`
+- **≥ 80%**: history is folded into an LLM-generated summary *before* your next message, automatically
+- **manual**: type `/compact` in agent mode at any time; the summary replaces the history and is shown in the console
+
+Thresholds are tunable via `BIOAGENT_SUGGEST_PCT` / `BIOAGENT_AUTO_COMPACT_PCT` (fractions, default 0.6 / 0.8); window size via `BIOAGENT_CONTEXT_TOKENS` (default 131072).
+
 ## Building from source
 
 ```bash
