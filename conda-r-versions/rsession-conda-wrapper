@@ -21,7 +21,13 @@ for a in "$@"; do
 done
 rhome=""
 if [ -n "$user" ]; then
-   home="/home/$user"
+   # resolve the home directory via passwd: it may live outside /home
+   # (e.g. /home-ssd on nv) and hardcoding /home/$user silently broke
+   # environment switching for such users
+   home=$(getent passwd "$user" 2>/dev/null | cut -d: -f6)
+   if [ -z "$home" ] || [ ! -d "$home" ]; then
+      home="/home/$user"
+   fi
    sd=$(ls -1dt "$home"/.local/share/air-studio/sessions/active/session-*/ 2>/dev/null | head -1)
    if [ -n "${sd:-}" ] && [ -f "$sd/properites/r-version-home" ]; then
       rh=$(cat "$sd/properites/r-version-home" 2>/dev/null)
