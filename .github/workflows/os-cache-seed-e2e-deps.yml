@@ -1,3 +1,4 @@
+# (touch) force GitHub Actions to re-register this workflow; no functional change
 name: "Cache: Seed E2E test dependency caches"
 
 # Re-warms the os-e2e-deps caches (R library, pak download cache, Playwright
