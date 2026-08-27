@@ -436,8 +436,11 @@ jobs:
         if: inputs.build_from_source == true && inputs.rstudio_installer_url == ''
         run: |
           sudo apt-get install -y "${{ github.workspace }}/rstudio-server.deb"
-          sudo systemctl stop rstudio-server
-          sudo rstudio-server verify-installation
+          # This branch's package installs as air-studio-server: renamed service
+          # unit, admin CLI, and config/run/state paths. The artifact filename
+          # above is just the internal artifact name and is unchanged.
+          sudo systemctl stop air-studio-server
+          sudo air-studio-server verify-installation
 
       # Daily-download path: resolve and install the latest (or specified)
       # .deb. Runs when build_from_source is false (auto-resolve this branch's
@@ -511,12 +514,14 @@ jobs:
           INSTALLER_FILENAME: ${{ steps.resolve.outputs.filename }}
         run: |
           sudo apt-get install -y "./$INSTALLER_FILENAME"
-          sudo systemctl stop rstudio-server
-          sudo rstudio-server verify-installation
+          # Assumes this branch's air-studio-server layout; upstream
+          # rstudio-server dailies would need the legacy names instead.
+          sudo systemctl stop air-studio-server
+          sudo air-studio-server verify-installation
 
       - name: Configure verbose RStudio Server logging
         run: |
-          sudo tee /etc/rstudio/logging.conf >/dev/null <<'EOF'
+          sudo tee /etc/air-studio/logging.conf >/dev/null <<'EOF'
           [*]
           log-level=debug
           logger-type=file
@@ -531,35 +536,35 @@ jobs:
       # via the open-source overlay, so it needs no equivalent flag.)
       - name: Enable GitHub Copilot for rsessions
         run: |
-          echo "copilot-enabled=1" | sudo tee -a /etc/rstudio/rsession.conf >/dev/null
+          echo "copilot-enabled=1" | sudo tee -a /etc/air-studio/rsession.conf >/dev/null
 
       # The Playwright e2e tests drive RStudio through the window.rstudio
       # automation bridge, which is only exposed when rsession is started with
       # --automation-agent. server.fixture.ts forwards this flag when it
       # spawns its own rserver-dev; we instead use the systemd-managed
-      # rstudio-server installed from the .deb, so the flag has to come from
-      # the service unit. The option is registered in the pAutomation
+      # air-studio-server installed from the .deb, so the flag has to come
+      # from the service unit. The option is registered in the pAutomation
       # program_options group, which feeds the CLI parser only -- writing
-      # `automation-agent=1` into /etc/rstudio/rserver.conf is rejected
+      # `automation-agent=1` into /etc/air-studio/rserver.conf is rejected
       # ("unrecognised option"). Add the flag via a systemd drop-in that
       # overrides ExecStart, and reload systemd before the Start step.
       # Safe to enable here because the runner is ephemeral; do NOT enable
       # in production.
       - name: Enable automation-agent for rsessions
         run: |
-          sudo mkdir -p /etc/systemd/system/rstudio-server.service.d
-          sudo tee /etc/systemd/system/rstudio-server.service.d/automation-agent.conf >/dev/null <<'EOF'
+          sudo mkdir -p /etc/systemd/system/air-studio-server.service.d
+          sudo tee /etc/systemd/system/air-studio-server.service.d/automation-agent.conf >/dev/null <<'EOF'
           [Service]
           ExecStart=
-          ExecStart=/usr/lib/rstudio-server/bin/rserver --automation-agent
+          ExecStart=/usr/lib/air-studio/bin/rserver --automation-agent
           Environment=RSTUDIO_PANDOC=/usr/bin/pandoc
           EOF
           sudo systemctl daemon-reload
 
       - name: Start RStudio Server
         run: |
-          sudo systemctl start rstudio-server
-          sudo systemctl status rstudio-server --no-pager
+          sudo systemctl start air-studio-server
+          sudo systemctl status air-studio-server --no-pager
 
       - name: Generate test credentials
         run: |
@@ -578,14 +583,14 @@ jobs:
       - name: Wait for rstudio-server
         run: |
           for i in {1..30}; do
-            if curl -fsS http://localhost:8787/auth-sign-in >/dev/null 2>&1; then
-              echo "rstudio-server is ready"
+            if curl -fsS http://localhost:7878/auth-sign-in >/dev/null 2>&1; then
+              echo "air-studio-server is ready"
               exit 0
             fi
             sleep 2
           done
-          echo "rstudio-server did not become ready"
-          sudo journalctl -u rstudio-server --no-pager -n 200
+          echo "air-studio-server did not become ready"
+          sudo journalctl -u air-studio-server --no-pager -n 200
           exit 1
 
       - name: Install e2e test dependencies
@@ -670,7 +675,7 @@ jobs:
         env:
           PW_RSTUDIO_MODE: server
           PW_RSTUDIO_EDITION: os
-          PW_RSTUDIO_SERVER_URL: http://localhost:8787
+          PW_RSTUDIO_SERVER_URL: http://localhost:7878
           # Platform-labelled project name; playwright.config.ts uses it both as
           # the project name in reports (so a cross-platform merged report can
           # distinguish these results) and to derive the platform+shard-unique
@@ -772,16 +777,20 @@ jobs:
       - name: Capture rstudio-server logs and diagnostics on failure
         if: failure()
         run: |
-          echo "=== /etc/rstudio/logging.conf ==="
-          sudo cat /etc/rstudio/logging.conf 2>&1 || echo "(missing)"
+          echo "=== /etc/air-studio/logging.conf ==="
+          sudo cat /etc/air-studio/logging.conf 2>&1 || echo "(missing)"
+          echo "=== layout: /var/log/air-studio ==="
+          sudo find /var/log/air-studio -ls 2>&1 || echo "(missing)"
           echo "=== layout: /var/log/rstudio ==="
           sudo find /var/log/rstudio -ls 2>&1 || echo "(missing)"
-          echo "=== layout: /var/lib/rstudio-server *.log ==="
-          sudo find /var/lib/rstudio-server -name '*.log' -ls 2>&1 || echo "(missing)"
+          echo "=== layout: /var/lib/air-studio-server *.log ==="
+          sudo find /var/lib/air-studio-server -name '*.log' -ls 2>&1 || echo "(missing)"
           echo "=== full journalctl (last hour, all units) ==="
           sudo journalctl --since="1 hour ago" --no-pager
-          sudo journalctl -u rstudio-server --no-pager > rstudio-server.log || true
-          sudo cp -r /var/log/rstudio rstudio-var-log || true
+          sudo journalctl -u air-studio-server --no-pager > rstudio-server.log || true
+          sudo mkdir -p rstudio-var-log
+          sudo cp -r /var/log/air-studio rstudio-var-log/ 2>/dev/null || true
+          sudo cp -r /var/log/rstudio rstudio-var-log/ 2>/dev/null || true
           sudo chmod -R a+r rstudio-var-log || true
 
       - name: Upload rstudio-server logs
