@@ -1,11 +1,6 @@
 name: "Test: E2E Playwright RStudio (Desktop, Ubuntu 24, Open Source, Scheduled)"
 
 on:
-  schedule:
-    # Mon-Fri at 02:30 UTC -- daily run against latest source on main.
-    # Offset from the Linux Server scheduled run (02:00) so the two don't
-    # contend for runners at the same minute.
-    - cron: '30 2 * * 1-5'
   workflow_dispatch:
 
 permissions:

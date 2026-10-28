@@ -1,5 +1,6 @@
 name: "Test: E2E Playwright RStudio (Scheduled Rotation and Run-All, Open Source)"
 
+# AIRstudio keeps this workflow manual-only; the upstream schedules below are disabled.
 # One workflow that drives the reusable per-OS E2E "engines" six ways:
 #   - Weekday cron (Mon-Fri): a fixed slate per weekday, so the engines in those
 #     slates get a run during the week without running the whole matrix daily.
@@ -47,12 +48,6 @@ name: "Test: E2E Playwright RStudio (Scheduled Rotation and Run-All, Open Source
 # other, and each must match its check in the pick job character for character.
 
 on:
-  schedule:
-    - cron: '0 8 * * 1-5'   # Mon-Fri 08:00 UTC (4 AM EDT) -- fixed slate per weekday
-    - cron: '0 8 * * 0'     # Sunday 08:00 UTC (4 AM EDT) -- every Linux x86_64 engine (this string must match the check in the pick job and the concurrency group below)
-    - cron: '0 12 * * 0'    # Sunday 12:00 UTC (8 AM EDT) -- every Linux arm64 engine (this string must match the check in the pick job and the concurrency group below)
-    - cron: '0 16 * * 0'    # Sunday 16:00 UTC (noon EDT) -- every macOS and Windows engine (this string must match the check in the pick job and the concurrency group below)
-    - cron: '0 16 * * 5'    # Friday 16:00 UTC (noon EDT) -- macOS 14 only (this string must match the check in the pick job and the concurrency group below)
   workflow_dispatch:
     inputs:
       version:

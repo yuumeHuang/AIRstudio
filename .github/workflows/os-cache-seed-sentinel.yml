@@ -4,8 +4,8 @@ name: "Cache Seed: Sentinel (re-seed evicted E2E build caches)"
 # entries least-recently-used first -- including the build caches the seed
 # workflows maintain on main. PR runs can only restore caches from their own
 # merge ref or from main, so once main's copy is evicted every PR build goes
-# cold (full dependency download + GWT recompile) until the next nightly
-# seed. This sentinel closes that gap: it periodically checks that each
+# cold (full dependency download + GWT recompile) until the next cache seed.
+# Run this sentinel manually to check that each
 # expected cache-key prefix still resolves on refs/heads/main and dispatches
 # the owning seed workflow when one has gone missing.
 #
@@ -14,9 +14,6 @@ name: "Cache Seed: Sentinel (re-seed evicted E2E build caches)"
 # macOS 14's routine runs install the daily .dmg and skip its build job, so the
 # build caches a seed would maintain are never read on that path.
 on:
-  schedule:
-    # Every 2 hours, offset from the nightly seeds (07:00 / 07:30 UTC).
-    - cron: '45 */2 * * *'
   workflow_dispatch:
 
 concurrency:

@@ -36,12 +36,6 @@ on:
       # caches, so watching them would just burn seed runs.
       - ".github/e2e-linux/ubuntu/build-setup.sh"
       - ".github/workflows/os-cache-seed-e2e-rstudio-desktop-os-ubuntu-24.yml"
-  # Nightly re-seed keeps the GHA sccache object cache recent on main so PR
-  # builds get a high compile-cache hit rate. GitHub evicts cache entries that
-  # haven't been accessed in 7 days. Offset from the Linux Server seed (07:00)
-  # so the two don't contend for runners at the same minute.
-  schedule:
-    - cron: '30 7 * * *'
   # Also dispatched by os-cache-seed-sentinel.yml when this seed's caches
   # have been evicted from main's scope (10 GB repo quota, LRU eviction).
   workflow_dispatch:

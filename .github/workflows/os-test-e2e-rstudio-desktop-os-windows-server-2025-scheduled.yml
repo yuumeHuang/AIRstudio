@@ -1,9 +1,6 @@
 name: "Test: E2E Playwright RStudio (Desktop, Windows Server 2025 x64, Open Source, Scheduled)"
 
 on:
-  schedule:
-    # Mon-Fri at 03:00 UTC -- daily full-suite run against latest daily build.
-    - cron: '0 3 * * 1-5'
   workflow_dispatch:
 
 concurrency:
